@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2015, 2025
+// SPDX-License-Identifier: MPL-2.0
+
 package getter
 
 import (
@@ -6,18 +9,31 @@ import (
 	"strings"
 )
 
-// SourceDirSubdir takes a source and returns a tuple of the URL without
-// the subdir and the URL with the subdir.
+// SourceDirSubdir takes a source URL and returns a tuple of the URL without
+// the subdir and the subdir.
+//
+// ex:
+//   dom.com/path/?q=p               => dom.com/path/?q=p, ""
+//   proto://dom.com/path//*?q=p     => proto://dom.com/path?q=p, "*"
+//   proto://dom.com/path//path2?q=p => proto://dom.com/path?q=p, "path2"
+//
 func SourceDirSubdir(src string) (string, string) {
-	// Calcaulate an offset to avoid accidentally marking the scheme
+
+	// URL might contains another url in query parameters
+	stop := len(src)
+	if idx := strings.Index(src, "?"); idx > -1 {
+		stop = idx
+	}
+
+	// Calculate an offset to avoid accidentally marking the scheme
 	// as the dir.
 	var offset int
-	if idx := strings.Index(src, "://"); idx > -1 {
+	if idx := strings.Index(src[:stop], "://"); idx > -1 {
 		offset = idx + 3
 	}
 
 	// First see if we even have an explicit subdir
-	idx := strings.Index(src[offset:], "//")
+	idx := strings.Index(src[offset:stop], "//")
 	if idx == -1 {
 		return src, ""
 	}
@@ -45,7 +61,9 @@ func SourceDirSubdir(src string) (string, string) {
 //
 // The returned path is the full absolute path.
 func SubdirGlob(dst, subDir string) (string, error) {
-	matches, err := filepath.Glob(filepath.Join(dst, subDir))
+	pattern := filepath.Join(dst, subDir)
+
+	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		return "", err
 	}

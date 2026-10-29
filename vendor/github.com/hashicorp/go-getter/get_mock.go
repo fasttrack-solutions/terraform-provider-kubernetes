@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2015, 2025
+// SPDX-License-Identifier: MPL-2.0
+
 package getter
 
 import (
@@ -6,6 +9,8 @@ import (
 
 // MockGetter is an implementation of Getter that can be used for tests.
 type MockGetter struct {
+	getter
+
 	// Proxy, if set, will be called after recording the calls below.
 	// If it isn't set, then the *Err values will be returned.
 	Proxy Getter

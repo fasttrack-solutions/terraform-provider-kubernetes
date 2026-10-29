@@ -9,8 +9,6 @@ import (
 	"github.com/hashicorp/terraform/config"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/terraform-providers/terraform-provider-aws/aws"
-	"github.com/terraform-providers/terraform-provider-google/google"
 	api "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubernetes "k8s.io/client-go/kubernetes"
@@ -23,8 +21,6 @@ func init() {
 	testAccProvider = Provider().(*schema.Provider)
 	testAccProviders = map[string]terraform.ResourceProvider{
 		"kubernetes": testAccProvider,
-		"google":     google.Provider(),
-		"aws":        aws.Provider(),
 	}
 }
 
@@ -180,20 +176,6 @@ func testAccPreCheck(t *testing.T) {
 	err := testAccProvider.Configure(terraform.NewResourceConfig(nil))
 	if err != nil {
 		t.Fatal(err)
-	}
-}
-
-func skipIfNoGoogleCloudSettingsFound(t *testing.T) {
-	if os.Getenv("GOOGLE_PROJECT") == "" || os.Getenv("GOOGLE_REGION") == "" || os.Getenv("GOOGLE_ZONE") == "" {
-		t.Skip("The environment variables GOOGLE_PROJECT, GOOGLE_REGION and GOOGLE_ZONE" +
-			" must be set to run Google Cloud tests - skipping")
-	}
-}
-
-func skipIfNoAwsSettingsFound(t *testing.T) {
-	if os.Getenv("AWS_DEFAULT_REGION") == "" || os.Getenv("AWS_ZONE") == "" || os.Getenv("AWS_ACCESS_KEY_ID") == "" || os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
-		t.Skip("The environment variables AWS_DEFAULT_REGION, AWS_ZONE, AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY" +
-			" must be set to run AWS tests - skipping")
 	}
 }
 
