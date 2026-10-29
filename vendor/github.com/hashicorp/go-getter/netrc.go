@@ -1,3 +1,6 @@
+// Copyright IBM Corp. 2015, 2025
+// SPDX-License-Identifier: MPL-2.0
+
 package getter
 
 import (
@@ -5,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"syscall"
 
 	"github.com/bgentry/go-netrc/netrc"
 	"github.com/mitchellh/go-homedir"
@@ -38,7 +42,7 @@ func addAuthFromNetrc(u *url.URL) error {
 	// If the file is not a file, then do nothing
 	if fi, err := os.Stat(path); err != nil {
 		// File doesn't exist, do nothing
-		if os.IsNotExist(err) {
+		if serr, ok := err.(*os.PathError); ok && (os.IsNotExist(serr.Err) || serr.Err == syscall.ENOTDIR) {
 			return nil
 		}
 
@@ -52,7 +56,7 @@ func addAuthFromNetrc(u *url.URL) error {
 	// Load up the netrc file
 	net, err := netrc.ParseFile(path)
 	if err != nil {
-		return fmt.Errorf("Error parsing netrc file at %q: %s", path, err)
+		return fmt.Errorf("Error parsing netrc file at %q: %w", path, err)
 	}
 
 	machine := net.FindMachine(u.Host)
