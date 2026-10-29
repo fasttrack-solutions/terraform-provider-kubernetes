@@ -11,7 +11,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
 	pkgApi "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	rest "k8s.io/client-go/rest"
@@ -103,7 +102,7 @@ func (c *CustomResourceClient) setConfigDefaults(target *GenericObjectID) rest.C
 	configShallowCopy.GroupVersion = &schema.GroupVersion{Group: target.Group, Version: target.Version}
 	configShallowCopy.APIPath = "/apis"
 	configShallowCopy.ContentType = runtime.ContentTypeJSON
-	configShallowCopy.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: scheme.Codecs}
+	configShallowCopy.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
 	return configShallowCopy
 }
 
